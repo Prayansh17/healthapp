@@ -51,7 +51,7 @@ exports.getAllPsychiatrists = (req, res, next) => {
 
       var hospital_name = "";
       var patient_count = 0;
-      var sql1 = "SELECT name1 from hospital WHERE id = ?"
+      var sql1 = "SELECT name1 from hospital WHERE hospital_id = ?"
       var sql2 = "SELECT SUM(patient_count) AS cnt FROM psychiatrist WHERE hospital_id = ?  GROUP BY hospital_id;"
       var sql3 = "SELECT id, name1, patient_count from psychiatrist where hospital_id = ?;"
 
