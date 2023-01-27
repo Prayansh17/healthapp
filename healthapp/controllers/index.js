@@ -1,13 +1,37 @@
 const AppError = require("../utils/appError");
 const conn = require("../services/db");
+const yup = require('yup');
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,15}$/;
+const phoneRegExp = /^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/;
 
 
 
+const registerUserSchema = yup
+  .object({
+    name: yup.string().trim().min(2).max(50),
+    address: yup.string().required().min(10),
+    email: yup.string().required().email(),
+    phone: yup.string().optional().matches(phoneRegExp, 'Phone number not valid'),
+    password: yup.string().matches(PASSWORD_REGEX, 'password must contain one upper character, one lower character and a number. Max length 15 and min length 8'),
+  })
+  .required();
+  
 exports.registerPatient = (req, res, next) => {
     if(!req.body) return next( new AppError("No form data", 404));
+    const { body } = req;
+    try {
+      const data = registerUserSchema.validateSync(body, { abortEarly: false, stripUnknown: true });
+    } catch (e) {
+      return res.status(422).json({ errors: e.inner });
+    };
+
+
     let phoneNumber = (req.body.phone==null)? null : req.body.phone;
     const values = [req.body.name, req.body.address, 
                     req.body.email, phoneNumber, req.body.password, req.file.filename];
+
+    
     
     var sql = "INSERT INTO patient (Name1, address, email, phone, pass, image) VALUES(?);"
     
